@@ -3,8 +3,9 @@
 #include <gl/GLU.h>
 #include <stdio.h>
 #include "bunnymodel.h"
+#include <math.h>
 
-GLint xValue, yValue, zValue;
+GLint xValue;
 
 GLint RemX, RemY;
 GLint EndX, EndY;
@@ -17,11 +18,8 @@ void MyDisplay()
 	glLoadIdentity();//I
 
 	xValue %= 360;
-	yValue %= 360;
-	zValue %= 360;
-	glRotatef(xValue + EndX, 1, 0, 0);
-	glRotatef(yValue + EndY, 0, 1, 0);
-	glRotatef(zValue, 0, 0, 1);
+
+	gluLookAt(cos(xValue * (3.14) / 180), 1, sin(xValue * (3.14) / 180), 0, 0, 0, 0, 1, 0);
 
 	glBegin(GL_LINES);
 	{
@@ -94,63 +92,27 @@ void MyDisplay()
 void MyKeyboard(unsigned char key,int x,int y) {
 	switch (key) {
 	case 'X':
-	case 'x':
 		xValue++;
 		xValue %= 360;
 		break;
 
-	case 'Y':
-	case 'y':
-		yValue++;
-		yValue %= 360;
+	case 'x':
+		xValue--;
+		xValue = xValue + 360;
+		xValue %= 360;
 		break;
 
-	case 'Z':
-	case 'z':
-		zValue++;
-		zValue %= 360;
-		break;
 	case 32:
 		xValue = 0;
-		yValue = 0;
-		zValue = 0;
+		break;
+	case 'q':
+		exit(0);
 		break;
 	}
 
 	glutPostRedisplay();
 }
 
-void MyMouse(int button, int state, int x, int y) {
-	if (button == GLUT_LEFT_BUTTON) {
-		if (state == GLUT_DOWN) {
-			RemX = x;
-			RemY = y;
-			EndX = x;
-			EndY = y;
-			RemStart = true;
-		}
-		else if (state == GLUT_UP) {
-			xValue += EndX;
-			yValue += EndY;
-			RemX = 0;
-			RemY = 0;
-			EndX = 0;
-			EndY = 0;
-			RemStart = false;
-			glutPostRedisplay();
-		}
-	}
-}
-
-void MyMotion(int x, int y) {
-	//printf("%d %d\n", x, y);
-	if (RemStart) {
-		EndY = x - RemX;
-		EndX = y - RemY;
-
-		glutPostRedisplay();
-	}
-}
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
@@ -163,14 +125,12 @@ int main(int argc, char** argv)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-1, 1, -1, 1, -1, 1);
+	glOrtho(-1, 1, -1, 1, -3, 3);
 
 	glEnable(GL_DEPTH_TEST);
 
 	glutDisplayFunc(MyDisplay);
 	glutKeyboardFunc(MyKeyboard);
-	glutMouseFunc(MyMouse);
-	glutMotionFunc(MyMotion);
 
 	glutMainLoop();
 }
